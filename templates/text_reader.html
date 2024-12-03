@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+<div class="row">
+    <div class="col-md-2" style="background-color: rgba(13,21,52,255);"></div>
+    <div style="line-height: 40px;" class="col-md-8">
+        {% for section in text %}
+            <span class="clickable-span" id="span-to-click">{{ section }}</span>
+        {% endfor %}
+        <div class="bubble" id="main-bubble">
+            <button class="close-button" onclick="closeBubble('main-bubble')">X</button>
+            <div id="main-bubble-content"></div>
+        </div>
+        <div class="bubble" id="word-bubble">
+            <button class="close-button" onclick="closeBubble('word-bubble')">X</button>
+            <div id="word-bubble-content"></div>
+        </div>
+    </div>
+    <div class="col-md-2" style="background-color: rgba(13,21,52,255);"></div>
+</div>
+</div>
+
+<script>
+    const spans = document.querySelectorAll('.clickable-span');
+    const mainBubble = document.getElementById('main-bubble');
+    const mainBubbleContent = document.getElementById('main-bubble-content');
+    const wordBubble = document.getElementById('word-bubble');
+    const wordBubbleContent = document.getElementById('word-bubble-content');
+
+    spans.forEach(span => {
+        span.addEventListener('click', async () => {
+            const text = span.innerText;
+
+            const response = await fetch('/preprocess-text/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                body: JSON.stringify({ text }),
+            });
+
+            const data = await response.json();
+            const { pronunciation, sentence_translation, words } = data;
+
+            //<div><strong>Pronunciation:</strong> ${pronunciation}
+            mainBubbleContent.innerHTML = `
+                <div><strong>Translation:</strong> ${sentence_translation}</div>
+                </div><div><strong>Sentence:</strong></div>
+                ${words.map(word => `<span class="clickable-word">${word}</span>`).join(' ')}
+            `;
+
+            document.querySelectorAll('.clickable-word').forEach(wordElement => {
+                wordElement.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    const word = wordElement.textContent;
+
+                    const wordResponse = await fetch('/process-word/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken'),
+                        },
+                        body: JSON.stringify({ word }),
+                    });
+
+                    const wordData = await wordResponse.json();
+                    wordBubbleContent.innerText = `${word} (${wordData.pronunciation}): ${wordData.message}`;
+                    wordBubble.style.display = 'block';
+
+                    const wordRect = wordElement.getBoundingClientRect();
+                    const container = document.querySelector('.col-md-8');
+                    positionBubbleWithinContainer(wordBubble, wordRect, container);
+                });
+            });
+
+            const spanRect = span.getBoundingClientRect();
+            const container = document.querySelector('.col-md-8');
+            mainBubble.style.display = 'block';
+            positionBubbleWithinContainer(mainBubble, spanRect, container);
+        });
+    });
+
+
+    function positionBubbleWithinContainer(bubble, targetRect, container) {
+        const containerRect = container.getBoundingClientRect();
+        const bubbleWidth = bubble.offsetWidth;
+        const bubbleHeight = bubble.offsetHeight;
+
+        let x = targetRect.left + window.scrollX - containerRect.left + targetRect.width / 2 - bubbleWidth / 2;
+        let y = targetRect.bottom + window.scrollY - containerRect.top;
+
+        if (x + bubbleWidth > containerRect.width) {
+            x = containerRect.width - bubbleWidth - 10;
+        }
+        if (x < 0) {
+            x = 10;
+        }
+
+        const viewportHeight = window.innerHeight;
+        if (y + bubbleHeight > viewportHeight) {
+            y = targetRect.top + window.scrollY - bubbleHeight - 10;
+        }
+
+        bubble.style.left = `${x}px`;
+        bubble.style.top = `${y}px`;
+    }
+
+    function closeBubble(bubbleId) {
+        const bubble = document.getElementById(bubbleId);
+        bubble.style.display = 'none';
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+
+{% endblock %}

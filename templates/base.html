@@ -1,0 +1,125 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SpeciLex Mandarin</title>
+    <style>
+        .center {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 50%;
+            background-color: rgba(13,21,52,255);
+        }
+
+        .clickable-span {
+            padding: 5px 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            background-color: lightgray;
+            transition: background-color 0.3s;
+            margin: 40px 2px;
+        }
+
+        .clickable-span:hover {
+            background-color: #d3d3f2;
+        }
+
+        .bubble {
+            position: absolute;
+            background-color: white;
+            border: 1px solid black;
+            border-radius: 10px;
+            padding: 20px 10px 10px;
+            display: none;
+            z-index: 1000;
+            text-align: center;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 90%;
+            word-wrap: break-word;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            color: black;
+            z-index: 1100;
+        }
+
+        .close-button:hover {
+            color: red;
+        }
+
+        .clickable-word {
+            padding: 3px 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #f0f0f0;
+            transition: background-color 0.3s;
+            display: inline-block;
+            margin: 5px 2px;
+        }
+
+        .clickable-word:hover {
+            background-color: #d3d3f2;
+        }
+
+        .col-md-8 {
+            position: relative;
+            border: solid black 1px;
+            box-shadow: 0px 0px 10px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .textarea-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+    </style>
+</head>
+<body>
+{# Load the tag library #}
+{% load bootstrap4 %}
+
+{# Load CSS and JavaScript #}
+{% bootstrap_css %}
+{% bootstrap_javascript jquery='full' %}
+
+<header>
+    <div class="container-fluid">
+    <div class="row" style="background-color: rgba(13,21,52,255);">
+        <div class="col-md-12">
+            <a href="{% url 'home' %}"><img src="{% static 'BannerMiddle.png' %}" class="center"></a>
+        </div>
+    </div>
+    </div>
+</header>
+
+
+{% block content %}
+
+
+
+{% endblock %}
+
+<footer>
+    <div class="container-fluid">
+    <div class="row" style="background-color: rgba(13,21,52,255);">
+        <div class="col-md-12">
+            <a href="{% url 'home' %}"><img src="{% static 'BannerMiddle.png' %}" class="center"></a>
+        </div>
+    </div>
+    </div>
+</footer>
+
+</body>
+</html>
